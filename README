@@ -7,8 +7,9 @@ This README outlines the development plan for the event scheduling application, 
 ### Tasks
 
 - [ ] **Setup Project Structure**: Initialize the project with basic module files and a Git repository.
+  - 'tests/test_calendar'
   - `main.py`
-  - `calendar.py`
+  - `event_calendar.py`
   - `edit.py`
   - `input.py`
   - `report.py`
@@ -19,7 +20,7 @@ This README outlines the development plan for the event scheduling application, 
   - [ ] Load room configurations from an external file.
   - [ ] Allow easy updates to configuration without altering the source code.
 
-- [ ] **Event Management System** (`calendar.py`):
+- [ ] **Event Management System** (`event_calendar.py`):
   - [ ] Create a pandas DataFrame to hold event data.
   - [ ] Implement functions to add, edit, and delete events.
   - [ ] Ensure data integrity within the DataFrame for event scheduling.
