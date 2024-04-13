@@ -7,7 +7,7 @@ This README outlines the development plan for the event scheduling application, 
 ### Tasks
 
 - [ ] **Setup Project Structure**: Initialize the project with basic module files and a Git repository.
-  - 'tests/test_calendar'
+  - `tests/test_calendar`
   - `main.py`
   - `event_calendar.py`
   - `edit.py`
@@ -20,10 +20,12 @@ This README outlines the development plan for the event scheduling application, 
   - [ ] Load room configurations from an external file.
   - [ ] Allow easy updates to configuration without altering the source code.
 
-- [ ] **Event Management System** (`event_calendar.py`):
-  - [ ] Create a pandas DataFrame to hold event data.
-  - [ ] Implement functions to add, edit, and delete events.
-  - [ ] Ensure data integrity within the DataFrame for event scheduling.
+- [x] **Event Management System** (`event_calendar.py`):
+  - [x] Create a pandas DataFrame to hold event data.
+  - [x] Implement functions to add, edit, and delete events.
+  - [x] Ensure data integrity within the DataFrame for event scheduling.
+  - [x] Separate `copy_event` and `edit_event` functionalities to adhere to single responsibility principles while using shared helper methods to avoid code duplication.
+  - [ ] Add functionality to copy events, potentially integrating data from previous years or external sources.
 
 - [ ] **User Interface** (`main.py`):
   - [ ] Implement command line parsing for event operations using `argparse`.
@@ -38,7 +40,7 @@ This README outlines the development plan for the event scheduling application, 
   - [ ] Setup automatic saving mechanism for changes.
 
 - [ ] **Testing and Validation**:
-  - [ ] Create unit tests for each functional part of the application.
+  - [ ] Create unit tests for each functional part of the application, including `copy_event` and `edit_event`.
   - [ ] Perform integration testing to ensure all components work together seamlessly.
 
 ## Phase 2: Labor Management System
@@ -66,11 +68,10 @@ This README outlines the development plan for the event scheduling application, 
 
 ## Documentation
 
-- [ ] **Update README**: Continuously update the README as development progresses.
+- [x] **Update README**: Continuously update the README as development progresses.
 - [ ] **Developer Documentation**: Ensure all code is well-documented, explaining the purpose and function of each module and method.
 
 ## Deployment
 
 - [ ] **Prepare Deployment**: Set up necessary environments and verify that the application runs smoothly in production settings.
 - [ ] **User Training**: Provide documentation and training for end-users on how to use the application effectively.
-
