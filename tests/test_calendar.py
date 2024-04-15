@@ -98,3 +98,69 @@ def test_edit_event_change_room_and_time(setup_calendar):
     assert len(calendar.calendar.at[now, 'Conference Room']) == 0
     assert len(calendar.calendar.at[new_time, 'Meeting Room 1']) == 1
     assert calendar.calendar.at[new_time, 'Meeting Room 1'][0]['event_name'] == 'Planning Session'
+
+
+def test_copy_event_basic(setup_calendar):
+    now = get_current_time()
+    calendar = setup_calendar
+    calendar.add_event('Conference Room', now, 'Initial Meeting', 60)
+    new_time = now + timedelta(days=1)
+    # Correctly specify new_time as the new_start_datetime and explicitly name the parameter
+    calendar.copy_event(now, 'Conference Room', 'Initial Meeting', new_start_datetime=new_time)
+
+    # Verify original event exists
+    assert len(calendar.list_events_on_date(now)['Conference Room']) == 1
+    # Verify new event is copied correctly
+    assert len(calendar.list_events_on_date(new_time)['Conference Room']) == 1
+
+
+def test_copy_event_room_change(setup_calendar):
+    now = get_current_time()
+    calendar = setup_calendar
+    calendar.add_event('Conference Room', now, 'Room Change Meeting', 60)
+    new_room = "Meeting Room 1"
+    calendar.copy_event(now, 'Conference Room', 'Room Change Meeting', new_room=new_room, new_start_datetime=now)
+
+    # Verify event is in the new room
+    assert len(calendar.list_events_on_date(now)[new_room]) == 1
+    # Verify original room is unaffected
+    assert len(calendar.list_events_on_date(now)['Conference Room']) == 1
+
+
+def test_copy_event_conflict(setup_calendar):
+    now = get_current_time()
+    calendar = setup_calendar
+    calendar.add_event('Conference Room', now, 'Conflict Meeting', 60)
+    calendar.add_event('Conference Room', now + timedelta(hours=1), 'Non-Overlapping Meeting', 60)
+
+    # Attempt to copy the 'Conflict Meeting' to a time that overlaps with 'Non-Overlapping Meeting'
+    with pytest.raises(ValueError):
+        calendar.copy_event(now, 'Conference Room', 'Conflict Meeting',
+                            new_start_datetime=now + timedelta(minutes=30))
+
+    # Check that the original event is still in place and no new event was added at the conflict time
+    assert len(calendar.list_events_on_date(now)['Conference Room']) == 1
+    new_time = now + timedelta(minutes=30)
+    assert len(calendar.list_events_on_date(new_time)['Conference Room']) == 0
+
+
+def test_copy_event_invalid_date(setup_calendar):
+    now = get_current_time()
+    calendar = setup_calendar
+    calendar.add_event('Conference Room', now, 'Future Meeting', 60)
+    invalid_time = now + timedelta(days=365)  # Beyond the current calendar range
+    with pytest.raises(ValueError):
+        calendar.copy_event(now, 'Conference Room', 'Future Meeting', invalid_time)
+
+
+def test_copy_multiple_events(setup_calendar):
+    now = get_current_time()
+    calendar = setup_calendar
+    calendar.add_event('Conference Room', now, 'Multi-Copy Meeting', 60)
+    copy_times = [now + timedelta(days=i) for i in range(1, 5)]  # Next four days
+    for copy_time in copy_times:
+        calendar.copy_event(now, 'Conference Room', 'Multi-Copy Meeting', copy_time)
+
+    # Check each day to ensure the event was copied
+    for copy_time in copy_times:
+        assert len(calendar.list_events_on_date(copy_time)['Conference Room']) == 1
