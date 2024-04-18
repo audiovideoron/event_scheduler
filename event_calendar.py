@@ -145,10 +145,6 @@ class EventCalendar:
         print(f"Event '{original_event_name}' edited successfully.")
 
     def copy_event(self, original_datetime, original_room, event_name, new_room=None, new_start_datetime=None):
-        print("Starting copy_event...")
-        print(f"Attempting to access or modify date: {new_start_datetime}")
-        print(f"Calendar range from {self.calendar.index[0]} to {self.calendar.index[-1]}")
-
         # Check if new_start_datetime is within the DataFrame index
         if new_start_datetime not in self.calendar.index:
             raise ValueError(f"Attempted to access a date outside of the calendar's range: {new_start_datetime}")
@@ -161,7 +157,6 @@ class EventCalendar:
         original_event, index = self.find_event(original_datetime, original_room, event_name)
         if original_event is None:
             raise ValueError("Original event not found.")
-        print(f"Original event found: {original_event}")
 
         if new_room is None:
             new_room = original_room
@@ -170,7 +165,6 @@ class EventCalendar:
 
         original_duration = (original_event['end_time'] - original_event['start_time']).total_seconds() / 60
         new_end_datetime = new_start_datetime + timedelta(minutes=original_duration)
-        print(f"Attempting to copy to {new_room} at {new_start_datetime} with duration {original_duration} minutes.")
 
         # Check for overlaps
         time_slots = pd.date_range(start=new_start_datetime, end=new_end_datetime - timedelta(minutes=1), freq='1T')
@@ -184,4 +178,3 @@ class EventCalendar:
         new_event = {'event_name': event_name, 'start_time': new_start_datetime, 'end_time': new_end_datetime}
         for time_slot in time_slots:
             self.calendar.at[time_slot, new_room].append(new_event)
-        print(f"Event '{event_name}' copied successfully from {original_room} to {new_room} at {new_start_datetime}.")

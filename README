@@ -13,7 +13,7 @@ This README outlines the development plan for the event scheduling application, 
   - `edit.py`
   - `input.py`
   - `report.py`
-  - `save_calendar.py`
+  - `data_store.py`
   - `config.py`
 
 - [ ] **Configuration Management**: Develop `config.py` to handle dynamic configurations like room lists.
@@ -35,7 +35,7 @@ This README outlines the development plan for the event scheduling application, 
   - [ ] Integrate `tabulate` for displaying events in a tabular format.
   - [ ] Allow viewing events by day, week, and month.
 
-- [ ] **Data Persistence** (`save_calendar.py`):
+- [ ] **Data Persistence** (`data_store.py`):
   - [ ] Implement functionality to export the calendar to CSV and Excel formats.
   - [ ] Setup automatic saving mechanism for changes.
 
