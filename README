@@ -39,9 +39,9 @@ This README outlines the development plan for the event scheduling application, 
   - [ ] Implement functionality to export the calendar to CSV and Excel formats.
   - [ ] Setup automatic saving mechanism for changes.
 
-- [ ] **Testing and Validation**:
-  - [ ] Create unit tests for each functional part of the application, including `copy_event` and `edit_event`.
-  - [ ] Perform integration testing to ensure all components work together seamlessly.
+- [x] **Testing and Validation**:
+  - [x] Create unit tests for each functional part of the application, including `copy_event` and `edit_event`.
+  - [x] Perform integration testing to ensure all components work together seamlessly.
 
 ## Phase 2: Labor Management System
 

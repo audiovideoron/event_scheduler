@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 
 class EventCalendar:
-    def __init__(self, rooms, start_datetime=None, num_days=180, time_interval='1T'):
+    def __init__(self, rooms, start_datetime=None, num_days=730, time_interval='1T'):  # Set to 730 days for two years
         self.rooms = rooms
         if start_datetime is None:
             start_datetime = datetime.now()
@@ -12,6 +12,7 @@ class EventCalendar:
         date_range = pd.date_range(start=start_datetime, end=end_datetime, freq=time_interval)
         self.calendar = pd.DataFrame(index=date_range, columns=rooms)
         self.calendar = self.calendar.applymap(lambda x: [])
+        print(f"Calendar initialized from {start_datetime} to {end_datetime}")
 
     """
     Add an event to the calendar.
@@ -143,37 +144,44 @@ class EventCalendar:
 
         print(f"Event '{original_event_name}' edited successfully.")
 
-    def copy_event(self, original_datetime, original_room, event_name, new_room=None, new_start_datetime=None,
-                   new_duration_minutes=None):
-        # Find the original event
+    def copy_event(self, original_datetime, original_room, event_name, new_room=None, new_start_datetime=None):
+        print("Starting copy_event...")
+        print(f"Attempting to access or modify date: {new_start_datetime}")
+        print(f"Calendar range from {self.calendar.index[0]} to {self.calendar.index[-1]}")
+
+        # Check if new_start_datetime is within the DataFrame index
+        if new_start_datetime not in self.calendar.index:
+            raise ValueError(f"Attempted to access a date outside of the calendar's range: {new_start_datetime}")
+
+        # Date range validation
+        if new_start_datetime is not None:
+            if new_start_datetime < self.calendar.index[0] or new_start_datetime > self.calendar.index[-1]:
+                raise ValueError(f"Attempted to access a date outside of the calendar's range: {new_start_datetime}")
+
         original_event, index = self.find_event(original_datetime, original_room, event_name)
         if original_event is None:
             raise ValueError("Original event not found.")
+        print(f"Original event found: {original_event}")
 
         if new_room is None:
             new_room = original_room
         if new_start_datetime is None:
             new_start_datetime = original_datetime
-        if new_duration_minutes is None:
-            original_duration = (original_event['end_time'] - original_event['start_time']).total_seconds() / 60
-            new_duration_minutes = original_duration
 
-        new_end_datetime = new_start_datetime + timedelta(minutes=new_duration_minutes)
+        original_duration = (original_event['end_time'] - original_event['start_time']).total_seconds() / 60
+        new_end_datetime = new_start_datetime + timedelta(minutes=original_duration)
+        print(f"Attempting to copy to {new_room} at {new_start_datetime} with duration {original_duration} minutes.")
 
         # Check for overlaps
-
         time_slots = pd.date_range(start=new_start_datetime, end=new_end_datetime - timedelta(minutes=1), freq='1T')
         for time_slot in time_slots:
-            if self.calendar.at[time_slot, new_room]:
-                raise ValueError("Event time overlap with another event.")
-
             current_events = self.calendar.at[time_slot, new_room]
-            if any(e for e in current_events if e['event_name'] != event_name):
-                raise ValueError(f"Conflict detected at {time_slot}, not proceeding with event copy.")
+            if current_events:
+                print(f"Conflict detected at {time_slot}, not proceeding with event copy.")
+                return
 
         # If no conflicts, copy the event to new time and room
         new_event = {'event_name': event_name, 'start_time': new_start_datetime, 'end_time': new_end_datetime}
         for time_slot in time_slots:
             self.calendar.at[time_slot, new_room].append(new_event)
-
         print(f"Event '{event_name}' copied successfully from {original_room} to {new_room} at {new_start_datetime}.")
