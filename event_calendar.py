@@ -113,51 +113,61 @@ class EventCalendar:
                 return event, index
         return None, -1  # Return None and an invalid index if the event is not found
 
-    def check_overlap(self, room, start_datetime, end_datetime):
-        """
-        Check if there is any event overlap in the given room within the specified time range.
-        The method raises an exception if an overlap is found.
-
-        :param room: The room to check for event overlap.
-        :param start_datetime: The start datetime of the time range to check.
-        :param end_datetime: The end datetime of the time range to check.
-
-        :raises ValueError: If a time slot conflict is detected.
-        """
-
-        time_slots = pd.date_range(start=start_datetime, end=end_datetime, freq='1T')
-
-        for time_slot in time_slots:
-            events = self.calendar.at[time_slot, room]
-
-            if events:
-                raise ValueError("Time slot conflict: another event exists in the same room at the same time.")
-
-    def add_event(self, room, start_datetime, event_name, duration_minutes):
+    def check_overlap(self, room, start_datetime, end_datetime, event_name=None):
         """
         :param room: The room where the event will take place.
         :param start_datetime: The starting datetime of the event.
+        :param end_datetime: The ending datetime of the event.
         :param event_name: The name of the event.
-        :param duration_minutes: The duration of the event in minutes.
-        :return: None
-
-        This method adds an event to the calendar. It first checks for any overlap with existing events in the
-        specified room. If there is an overlap, it raises a ValueError. If there is no overlap, it adds the event to
-        all its time slots.
-
-        Example Usage: ``` calendar.add_event(room='Room 1', start_datetime=datetime(2021, 10, 1, 10, 0),
-        event_name='Meeting', duration_minutes=60) ```
+        :return: Boolean indicating if an overlap occurs.
         """
-        end_datetime = start_datetime + timedelta(minutes=duration_minutes)
-        event = {'event_name': event_name, 'start_time': start_datetime, 'end_time': end_datetime}
-        # Check for overlap for all time slots
+        # Generate all time slots for the event
         time_slots = pd.date_range(start=start_datetime, end=end_datetime - timedelta(minutes=1), freq='1T')
 
+        # Check if any the time slots already contains an event (ignoring the event_name in edit_event scenario)
         for time_slot in time_slots:
-            if self.calendar.at[time_slot, room]:
-                raise ValueError("Event time overlap")
+            if any(e for e in self.calendar.at[time_slot, room] if e['event_name'] != event_name):
+                return True  # An overlap occurs
 
-        # If there's no overlap, add the event to all its time slots
+        return False  # No overlap occurs
+
+    # def add_event(self, room, start_datetime, event_name, duration_minutes):
+    #     """
+    #     :param room: The room where the event will take place.
+    #     :param start_datetime: The starting datetime of the event.
+    #     :param event_name: The name of the event.
+    #     :param duration_minutes: The duration of the event in minutes.
+    #     :return: None
+
+    #     This method adds an event to the calendar. It first checks for any overlap with existing events in the
+    #     specified room. If there is an overlap, it raises a ValueError. If there is no overlap, it adds the event to
+    #     all its time slots.
+
+    #     Example Usage: ``` calendar.add_event(room='Room 1', start_datetime=datetime(2021, 10, 1, 10, 0),
+    #     event_name='Meeting', duration_minutes=60) ```
+    #     """
+    #     end_datetime = start_datetime + timedelta(minutes=duration_minutes)
+    #     event = {'event_name': event_name, 'start_time': start_datetime, 'end_time': end_datetime}
+    #     # Check for overlap for all time slots
+    #     time_slots = pd.date_range(start=start_datetime, end=end_datetime - timedelta(minutes=1), freq='1T')
+
+    #     for time_slot in time_slots:
+    #         if self.calendar.at[time_slot, room]:
+    #             raise ValueError("Event time overlap")
+
+    #     # If there's no overlap, add the event to all its time slots
+    #     for time_slot in time_slots:
+    #         self.calendar.at[time_slot, room] = [event]
+
+    def add_event(self, room, start_datetime, event_name, duration_minutes):
+        end_datetime = start_datetime + timedelta(minutes=duration_minutes)
+        event = {'event_name': event_name, 'start_time': start_datetime, 'end_time': end_datetime}
+
+        if self.check_overlap(room, start_datetime, end_datetime):
+            raise ValueError("Event time overlap")
+
+        # Use the similar timeline as before to fill the calendar slots with events
+        time_slots = pd.date_range(start=start_datetime, end=end_datetime - timedelta(minutes=1), freq='1T')
         for time_slot in time_slots:
             self.calendar.at[time_slot, room] = [event]
 
